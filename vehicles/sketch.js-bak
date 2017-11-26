@@ -1,0 +1,255 @@
+var url = 'http://api.metro.net/agencies/lametro/vehicles/?callback=drawData';
+var len, vehicles, canvas, myLat, myLon, myPos, vPos, myMap, heading, angle;
+var True = true;
+var key = 'AIzaSyBPv8K2ekj5AyY2zaz1bgvfZoPZPezos94';
+var style = [
+  {
+    "stylers": [
+      {
+        "saturation": -45
+      }
+    ]
+  },
+  {
+    "elementType": "labels",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.neighborhood",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural.terrain",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "stylers": [
+      {
+        "visibility": "on"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "labels.icon",
+    "stylers": [
+      {
+        "visibility": "on"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "labels.text",
+    "stylers": [
+      {
+        "visibility": "on"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station.airport",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station.bus",
+    "stylers": [
+      {
+        "visibility": "on"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station.bus",
+    "elementType": "labels.icon",
+    "stylers": [
+      {
+        "visibility": "on"
+      },
+      {
+        "weight": 8
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station.bus",
+    "elementType": "labels.text",
+    "stylers": [
+      {
+        "visibility": "on"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station.rail",
+    "stylers": [
+      {
+        "visibility": "on"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station.rail",
+    "elementType": "labels.icon",
+    "stylers": [
+      {
+        "visibility": "on"
+      },
+      {
+        "weight": 8
+      }
+    ]
+  }
+]
+
+var w = window.innerWidth;
+var h = window.innerHeight+20;
+// Options for map
+var options = {
+  lat: 34.021,
+  lng: -118.3,
+  zoom: 11,
+  styles: style,
+  maptype: 'terrain',
+}
+
+// Create an instance of Google maps
+var mappa = new Mappa('Google', key);
+
+
+function setup() {
+  geoLocate();
+  heading = createVector();
+  canvas = createCanvas(w, h);
+  loadJSON(url, "jsonp",drawData);
+    // Create a tile map and overlay the canvas on top.
+  myMap = mappa.tileMap(options);
+  myMap.overlay(canvas);
+}
+
+function drawData(analysis){
+  // how many vehicles were detected?
+  len = analysis.items.length;
+  console.log(len);
+  vehicles = analysis;
+
+   // Only redraw the vehicles when the map change and not every frame.
+  myMap.onChange(draw);
+}
+
+function geoLocate() {
+  navigator.geolocation.getCurrentPosition(showPosition);
+  function showPosition(position) {
+    myLat  = position.coords.latitude;
+    myLon = position.coords.longitude;
+    drawMe();
+  }
+}
+function drawMe(){
+  myPos = myMap.latLngToPixel(myLat, myLon);
+  fill(0);
+  ellipse(myPos.x, myPos.y, 20,20);
+}
+
+function draw(){
+    // Clear the canvas everytime the map moves
+  clear();
+  if (vehicles){
+    drawMe();
+  // for each item...
+  for (var i = 0; i < len; i++) {
+    new Vehicle();
+    // how many seconds since last report?
+    var n = vehicles.items[i].seconds_since_report;
+    // what's the route id?
+    var t = vehicles.items[i].route_id;
+    //map seconds since last report to opacity
+    var c = color(255, 153, 0, 255-n);
+    // Get the lat/lng of each vehicle
+    var latitude = Number(vehicles.items[i].latitude);
+    var longitude = Number(vehicles.items[i].longitude);
+    // Get the angle for heading (convert to radians)
+
+
+    // Only draw them if the position is inside the current map bounds. We use a
+    // Google Map method to check if the lat and lng are contained inside of the current
+    // map. This way we draw just what we are going to see and not everything. See
+    // getBounds() in https://developers.google.com/maps/documentation/javascript/3.exp/reference
+    if (myMap.map.getBounds().contains({lat: latitude, lng: longitude})) {
+      // Transform lat/lng to pixel position
+      pos = myMap.latLngToPixel(latitude, longitude);
+      vPos = createVector(pos.x, pos.y);
+      angle = radians(Number(vehicles.items[i].heading));
+      heading = p5.Vector.fromAngle(angle);
+
+      vPos.add(heading);
+      //draw ellipses to represent buses
+      fill(c);
+      noStroke();
+  	  ellipse(vPos.x, vPos.y, 10, 10);
+      text(angle, pos.x, pos.y);
+      angle=angle+=1;
+    }
+    /*
+    //add a label
+    if (dist(mouseX,mouseY,pos.x, pos.y)<=20){
+    c=color(0,255,255,255-n);
+    fill(c);
+    textAlign(RIGHT, CENTER);
+  	text(t, pos.x-10, pos.y);
+
+    }
+  */
+ }
+ }
+  else {
+    text("collecting buses.... please wait", width/2, height/2);
+    }
+
+}
+
+function Vehicle(){
+
+}
