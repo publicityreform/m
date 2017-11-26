@@ -1,4 +1,4 @@
-var url = 'http://api.metro.net/agencies/lametro/vehicles/?callback=drawData';
+var url = 'https://api.metro.net/agencies/lametro/vehicles/?callback=drawData';
 var len, vehicles, canvas, myLat, myLon, myPos, myMap, n,t,c,longitude,latitude,pos,vPos,angle;
 var heading;
 var True = true;
