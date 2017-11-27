@@ -214,7 +214,7 @@ function drawTarget(xloc, yloc, size, num) {
 
 function drawVehicles(){
   clear();
-  drawMe();
+  
 
   for (let i=0;i<len; i++){
   vehiclearray[i].render(i);
