@@ -184,6 +184,7 @@ function drawData(analysis){
   }
    // Only redraw the vehicles when the map change and not every frame.
   myMap.onChange(drawVehicles);
+  drawVehicles();
 }
 
 function geoLocate() {
@@ -214,6 +215,7 @@ function drawTarget(xloc, yloc, size, num) {
 
 function drawVehicles(){
   clear();
+  drawMe();
   
 
   for (let i=0;i<len; i++){
