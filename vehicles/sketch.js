@@ -196,11 +196,11 @@ function geoLocate() {
 }
 
 function drawMe(){
+    clear();
+  fill(255,0,0);
+  noStroke();
   myPos = myMap.latLngToPixel(myLat, myLon);
-  //fill(0);
-//  ellipse(myPos.x, myPos.y, 20,20);
-
-drawTarget(myPos.x, myPos.y, 20,100);
+  ellipse(myPos.x, myPos.y, op,op);
 }
 
 function drawTarget(xloc, yloc, size, num) {
@@ -224,8 +224,8 @@ function drawVehicles(){
 
 }
 function draw(){
-tm = tm+=1;
-
+  op = (abs((frameCount%200)-100))*0.1+10;
+  drawMe();
 
 
     // Clear the canvas everytime the map moves
