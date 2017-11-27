@@ -226,6 +226,7 @@ function drawVehicles(){
 function draw(){
   op = (abs((frameCount%200)-100))*0.1+10;
   drawMe();
+  drawVehicles();
 
 
     // Clear the canvas everytime the map moves
